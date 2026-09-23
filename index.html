@@ -30,6 +30,7 @@
     --blob-2: rgba(203, 224, 255, 0.6);
     --blob-3: rgba(255, 222, 222, 0.45);
     --blob-4: rgba(214, 244, 255, 0.55);
+    --tg-blue: #29a9eb;
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
@@ -95,7 +96,7 @@
     color: var(--text-0);
     padding: 28px 16px;
     position: relative;
-    overflow: hidden;
+    overflow-x: hidden;
     transition: background 0.3s ease, color 0.3s ease;
   }
 
@@ -147,7 +148,8 @@
     justify-content: space-between;
     margin-bottom: 16px;
   }
-  .theme-toggle {
+  .toolbar-actions { display: flex; align-items: center; gap: 8px; }
+  .theme-toggle, .tg-link {
     flex-shrink: 0;
     width: 32px;
     height: 32px;
@@ -159,10 +161,12 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    text-decoration: none;
     transition: color 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
   }
-  .theme-toggle:hover { color: var(--coral); border-color: var(--coral); transform: scale(1.06); }
-  .theme-toggle:active { transform: scale(0.94); }
+  .theme-toggle:hover, .tg-link:hover { color: var(--coral); border-color: var(--coral); transform: scale(1.06); }
+  .theme-toggle:active, .tg-link:active { transform: scale(0.94); }
+  .tg-link:hover { color: var(--tg-blue); border-color: var(--tg-blue); }
 
   /* ---------- right-click warning toast ---------- */
   .rc-warning {
@@ -389,11 +393,127 @@
   }
   .notes-list time { display: block; font-size: 0.68rem; color: var(--text-2); margin-top: 4px; }
   .notes-hint { font-size: 0.68rem; color: var(--text-2); margin-top: 6px; }
+
+  /* ---------- footer link ---------- */
+  .footer-link {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 0.76rem;
+  }
+  .footer-link a {
+    color: var(--text-2);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .footer-link a:hover { color: var(--tg-blue); }
+
+  /* =====================================================================
+     AD SLOTS
+     - Reserve fixed dimensions up front (no reflow / no layout shift).
+     - Purely static: no animation, no JS, no network calls — so they
+       cannot add jank or lag to the page.
+     - Desktop: two skyscraper rails sit in the empty background margins
+       on either side of the card, fixed to the viewport.
+     - Mobile: a single leaderboard banner docked to the bottom, safe-area
+       aware, replacing the (unused on narrow screens) side rails.
+     Drop your ad network's embed code (e.g. an AdSense <ins> tag) inside
+     .ad-slot in place of the placeholder graphic — the container sizing
+     below already reserves the space for it.
+     ===================================================================== */
+  .ad-slot {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px dashed var(--panel-edge);
+    border-radius: 14px;
+    color: var(--text-2);
+    box-shadow: 0 10px 24px var(--shadow-c);
+  }
+  .ad-slot svg { opacity: 0.55; }
+  .ad-slot span {
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .ad-rail {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 160px;
+    height: 600px;
+    z-index: 2;
+    display: none;
+  }
+  .ad-rail-left  { left: 24px; }
+  .ad-rail-right { right: 24px; }
+
+  .ad-banner-mobile {
+    position: fixed;
+    left: 50%;
+    bottom: env(safe-area-inset-bottom, 0px);
+    transform: translateX(-50%);
+    width: min(100% - 24px, 360px);
+    height: 60px;
+    z-index: 2;
+    margin: 0 12px 10px;
+    display: none;
+  }
+
+  /* Only show side rails once there's genuine empty background space
+     for them beside the card (card ~380px + 2×160px rails + gaps). */
+  @media (min-width: 1180px) {
+    .ad-rail { display: block; }
+  }
+  /* Below that, fall back to a single mobile-style banner so ad space
+     never overlaps or squeezes the player itself. */
+  @media (max-width: 1179px) {
+    .ad-banner-mobile { display: block; }
+    body { padding-bottom: 84px; } /* keep banner from covering content */
+  }
 </style>
 </head>
 <body>
 
   <div class="rc-warning" id="rcWarning">Right-click is disabled on this site</div>
+
+  <!-- Desktop skyscraper ad slots — sit in the empty background margins -->
+  <div class="ad-rail ad-rail-left">
+    <div class="ad-slot" aria-label="Advertisement space">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 0 1 5 5v1h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h1V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v1h6V7a3 3 0 0 0-3-3z" opacity="0"/></svg>
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="12" cy="7" r="4"/>
+        <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+      </svg>
+      <span>Ad space</span>
+    </div>
+  </div>
+  <div class="ad-rail ad-rail-right">
+    <div class="ad-slot" aria-label="Advertisement space">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="12" cy="7" r="4"/>
+        <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+      </svg>
+      <span>Ad space</span>
+    </div>
+  </div>
+
+  <!-- Mobile / narrow-screen banner ad slot -->
+  <div class="ad-banner-mobile">
+    <div class="ad-slot" aria-label="Advertisement space">
+      <span>Ad space</span>
+    </div>
+  </div>
 
   <div class="unit">
     <div class="toolbar">
@@ -401,11 +521,16 @@
         <h1>Hirushan D Live</h1>
         <p>Live streaming radio</p>
       </div>
-      <button class="theme-toggle" id="themeToggle" aria-label="Switch to dark mode">
-        <svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/>
-        </svg>
-      </button>
+      <div class="toolbar-actions">
+        <a class="tg-link" id="tgLink" href="https://t.me/Producer_Call" target="_blank" rel="noopener noreferrer" aria-label="Join our Telegram channel">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.3 18.6 20c-.2 1-.9 1.3-1.7.8l-4.8-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.4-5 9-8.2c.4-.4-.1-.6-.6-.2L6.6 13.1 1.9 11.6c-1-.3-1-1 .2-1.5L20.6 3.2c.8-.3 1.6.2 1.3 1.1z"/></svg>
+        </a>
+        <button class="theme-toggle" id="themeToggle" aria-label="Switch to dark mode">
+          <svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/>
+          </svg>
+        </button>
+      </div>
     </div>
 
     <div class="dial" aria-hidden="true"></div>
@@ -450,6 +575,13 @@
       </div>
       <div class="notes-list" id="notesList"></div>
       <p class="notes-hint">Sent to the show's Telegram channel.</p>
+    </div>
+
+    <div class="footer-link">
+      <a href="https://t.me/Producer_Call" target="_blank" rel="noopener noreferrer">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.3 18.6 20c-.2 1-.9 1.3-1.7.8l-4.8-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.4-5 9-8.2c.4-.4-.1-.6-.6-.2L6.6 13.1 1.9 11.6c-1-.3-1-1 .2-1.5L20.6 3.2c.8-.3 1.6.2 1.3 1.1z"/></svg>
+        Join us on Telegram
+      </a>
     </div>
   </div>
 
