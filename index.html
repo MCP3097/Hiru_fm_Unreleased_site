@@ -636,7 +636,6 @@
     </div>
   </div>
 
-  <script src="./stream-config.js"></script>
   <script>
     const audio = document.getElementById('radio');
     const playBtn = document.getElementById('playBtn');
@@ -649,11 +648,18 @@
     const timerEl = document.getElementById('timer');
     const listenersEl = document.getElementById('listeners');
 
-    // Stream link(s) live in stream-config.js — edit that file, not this one,
-    // to change or add a fallback stream URL.
-    const STREAM_SOURCES = (window.STREAM_SOURCES && window.STREAM_SOURCES.length)
-      ? window.STREAM_SOURCES
-      : ['https://radio.lotustechnologieslk.net:2020/stream/hirufmgarden/stream/1/'];
+    // Multiple URL formats to try, in order. The original path
+    // (".../hirufmgarden/stream/1/") looks like a malformed/duplicated
+    // mount path; sibling stations on this same host+port are served as
+    // ".../stream/<name>?icy=https", so that's tried first, with the
+    // no-query and original forms kept as fallbacks in case the server
+    // only accepts one particular form.
+    const STREAM_SOURCES = [
+      'https://radio.lotustechnologieslk.net:2020/stream/hirufmgarden?icy=https',
+      'https://radio.lotustechnologieslk.net:2020/stream/hirufmgarden',
+      'https://radio.lotustechnologieslk.net:2020/stream/hirufmgarden/stream/1/',
+      'http://radio.lotustechnologieslk.net:2020/stream/hirufmgarden'
+    ];
     let sourceIndex = 0;
     let manualStop = false;
 
@@ -824,8 +830,14 @@
       onChange: (v) => { ensureAudioGraph(); if (boostGain) boostGain.gain.value = Math.pow(10, v / 20); }
     });
 
-    // "Faah Moments" button logic now lives in faah-moments.js (loaded
-    // separately, see the <script> tag near the end of the page).
+    // ---- soundboard: "Faah Moments" one-shot effect ----
+    const faahBtn = document.getElementById('faahBtn');
+    const faahAudio = new Audio('https://www.myinstants.com/media/sounds/fahhhhh.mp3');
+    faahAudio.preload = 'none';
+    faahBtn.addEventListener('click', () => {
+      faahAudio.currentTime = 0;
+      faahAudio.play().catch((err) => console.error('Faah Moments playback failed:', err));
+    });
 
     // ---- desktop / mobile ad-layout switch (remembers choice on this device) ----
     const viewToggle = document.getElementById('viewToggle');
@@ -964,6 +976,5 @@
 
     renderNotes();
   </script>
-  <script src="./faah-moments.js"></script>
 </body>
 </html>
